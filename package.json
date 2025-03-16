@@ -1,5 +1,5 @@
 {
-    "name": "traverse-dependencies",
+    "name": "@open-automaton/traverse-dependencies",
     "version": "0.0.1",
     "type": "module",
     "main": "dist/index.mjs",
@@ -23,17 +23,17 @@
             "require": "./dist/index.cjs"
         }
     },
-    "homepage": "null",
-    "description": "null",
+    "homepage": "https://github.com/open-automaton/traverse-dependencies",
+    "description": "traverse dependencies in buildless ESM",
     "keywords": [],
-    "author": "null <null>()",
+    "author": "Abbey Hawk Sparrow <khrome>(http://abbeyhawksparrow.com)",
     "contributors": [],
     "repository": {
         "type": "git",
-        "url": "null"
+        "url": "git@github.com:open-automaton/traverse-dependencies.git"
     },
     "bugs": {
-        "url": "null"
+        "url": "https://github.com/open-automaton/traverse-dependencies/issues"
     },
     "moka": {
         "firefox": {
@@ -102,6 +102,7 @@
         "prepare": "husky install"
     },
     "dependencies": {
+        "@environment-safe/package": "^0.3.0",
         "browser-or-node": "^2.1.1"
     }
 }
