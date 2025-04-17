@@ -13,15 +13,11 @@ function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; 
 let internalRequire = null;
 if (typeof require !== 'undefined') internalRequire = require;
 const ensureRequire = () => !internalRequire && (internalRequire = mod.createRequire(require('url').pathToFileURL(__filename).toString()));
-const getCommonJS = (pkg, args = {}, options = {
-  prefix: '/'
-}) => {
+const getCommonJS = (pkg, args = {}, options = {}) => {
   return options.prefix + ['node_modules', pkg.name, pkg.exports && pkg.exports['.'] && pkg.exports['.'].require ? pkg.exports['.'].require : (pkg.type === 'commonjs' || !pkg.type) && (pkg.commonjs || pkg.main) || pkg.commonjs || args.r && pkg.main].join('/');
 };
-const getModule = (pkg, args = {}, options = {
-  prefix: '/'
-}) => {
-  return options.prefix + ['node_modules', pkg.name, pkg.exports && pkg.exports['.'] && pkg.exports['.'].import ? pkg.exports['.'].import : pkg.type === 'module' && (pkg.module || pkg.main) || pkg.module || args.r && pkg.main].join('/');
+const getModule = (pkg, args = {}, options = {}) => {
+  return (options.prefix || '') + ['node_modules', pkg.name, pkg.exports && pkg.exports['.'] && pkg.exports['.'].import ? pkg.exports['.'].import : pkg.type === 'module' && (pkg.module || pkg.main) || pkg.module || args.r && pkg.main].join('/');
 };
 const traversal = {};
 traversal.recursive = async (name, resolve, handle, state = {
@@ -60,13 +56,14 @@ traversal.unrolled = async (name, resolve, handle, state = {
     if (state.seen[moduleName]) continue;
     let thisPath = null;
     try {
-      thisPath = resolve(moduleName);
+      thisPath = await resolve(moduleName);
       let localPath = thisPath;
       if (!(_browserOrNode.isBrowser || _browserOrNode.isJsDom)) {
         //todo: bake into resolve?
         const parts = thisPath.split(`/${moduleName}/`);
         parts.pop();
-        localPath = parts.join(`/${moduleName}/`) + `/${moduleName}/`;
+        const joined = parts.join(`/${moduleName}/`);
+        localPath = joined ? joined + `/${moduleName}/` : `${moduleName}/`;
       }
       subpkg = await (0, _package.getPackage)(localPath);
       let dependencies = [];

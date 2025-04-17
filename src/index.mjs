@@ -6,7 +6,7 @@ if(typeof require !== 'undefined') internalRequire = require;
 const ensureRequire = ()=> (!internalRequire) && (internalRequire = mod.createRequire(import.meta.url));
 import { getPackage } from '@environment-safe/package';
 
-const getCommonJS = (pkg, args={}, options={prefix:'/'})=>{
+const getCommonJS = (pkg, args={}, options={})=>{
     return options.prefix + ['node_modules', pkg.name, (
         (pkg.exports && pkg.exports['.'] && pkg.exports['.'].require)?
             pkg.exports['.'].require:
@@ -17,8 +17,8 @@ const getCommonJS = (pkg, args={}, options={prefix:'/'})=>{
     )].join('/');
 };
 
-const getModule = (pkg, args={}, options={prefix:'/'})=>{
-    return options.prefix + ['node_modules', pkg.name, (
+const getModule = (pkg, args={}, options={})=>{
+    return (options.prefix||'') + ['node_modules', pkg.name, (
         (pkg.exports && pkg.exports['.'] && pkg.exports['.'].import)?
             pkg.exports['.'].import:
             ((
@@ -62,12 +62,13 @@ traversal.unrolled = async(name, resolve, handle, state={seen:{}, modules:{}})=>
         if(state.seen[moduleName]) continue;
         let thisPath = null;
         try{
-            thisPath = resolve(moduleName);
+            thisPath = await resolve(moduleName);
             let localPath = thisPath;
             if(!(isBrowser || isJsDom)){ //todo: bake into resolve?
                 const parts = thisPath.split(`/${moduleName}/`);
                 parts.pop();
-                localPath = parts.join(`/${moduleName}/`) + `/${moduleName}/`;
+                const joined =  parts.join(`/${moduleName}/`);
+                localPath = joined?joined + `/${moduleName}/`:`${moduleName}/`;
             }
             subpkg = await getPackage(localPath);
             let dependencies = [];
