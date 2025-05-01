@@ -18,14 +18,35 @@ const getCommonJS = (pkg, args={}, options={})=>{
 };
 
 const getModule = (pkg, args={}, options={})=>{
-    return (options.prefix||'') + ['node_modules', pkg.name, (
-        (pkg.exports && pkg.exports['.'] && pkg.exports['.'].import)?
-            pkg.exports['.'].import:
-            ((
-                pkg.type === 'module' && 
-                (pkg.module  || pkg.main) 
-            ) || pkg.module || (args.r && pkg.main))
-    )].join('/');
+    const filePath = getFromExports(pkg.exports, pkg);
+    return (options.prefix||'') + ['node_modules', pkg.name, filePath].join('/');
+};
+
+const getFromExports = (exports, pkg)=>{
+    if(exports && exports['.']){
+        if(Array.isArray(exports['.'])){
+            if(exports['.'][0] && exports['.'][0].import) return exports['.'][0].import;
+        }
+        if(exports['.'] && exports['.'].import){
+            if(typeof exports['.'].import === 'string'){
+                return exports['.'].import;
+            }
+            if(typeof exports['.'].import.default === 'string'){
+                return exports['.'].import.default;
+            }
+            if(
+                exports['.'].import.default && 
+                exports['.'].import.default.default && 
+                typeof exports['.'].import.default.default === 'string'
+            ){
+                return exports['.'].import.default.default;
+            }
+        }
+    }
+    return ((
+        pkg.type === 'module' && 
+        (pkg.module  || pkg.main) 
+    ) || pkg.module || pkg.main);
 };
 
 const traversal = {}; 
@@ -92,6 +113,7 @@ traversal.unrolled = async(name, resolve, handle, state={seen:{}, modules:{}})=>
                 }
             });
         }catch(ex){
+            //console.log(ex);
             state.seen[moduleName] = new Error(`Could not find ${moduleName}`);
         }
     }
